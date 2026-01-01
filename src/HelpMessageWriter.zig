@@ -2,7 +2,7 @@ const HelpMessageWriter = @This();
 
 const std = @import("std");
 const Arg = @import("Arg.zig");
-const BufferedWriter = std.fs.File.Writer;
+const BufferedWriter = std.Io.File.Writer;
 const Command = @import("Command.zig");
 const ParsedCommand = @import("parser/ParseResult.zig").ParsedCommand;
 
@@ -16,9 +16,9 @@ writer: BufferedWriter = undefined,
 /// Command whose help to write.
 command: *const ParsedCommand = undefined,
 
-pub fn init(command: *const ParsedCommand, buffer: []u8) HelpMessageWriter {
+pub fn init(command: *const ParsedCommand, io: std.Io, buffer: []u8) HelpMessageWriter {
     return HelpMessageWriter{
-        .writer = .init(std.fs.File.stderr(), buffer),
+        .writer = .init(std.Io.File.stderr(), io, buffer),
         .command = command,
     };
 }
