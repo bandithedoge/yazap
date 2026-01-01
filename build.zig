@@ -25,13 +25,16 @@ fn testStep(b: *std.Build) void {
 }
 
 fn examplesStep(b: *std.Build, yazap: *std.Build.Module) void {
-    var dir = std.fs.cwd().openDir("./examples/", .{ .iterate = true }) catch return;
-    defer dir.close();
+    var threaded_io: std.Io.Threaded = .init_single_threaded;
+    defer threaded_io.deinit();
+    const io = threaded_io.io();
+    var dir = std.Io.Dir.cwd().openDir(io, "./examples/", .{ .iterate = true }) catch return;
+    defer dir.close(io);
 
     const step = b.step("examples", "Build all the examples");
     var examples = dir.iterate();
 
-    while (examples.next() catch @panic("failed to get example file")) |example_file| {
+    while (examples.next(io) catch @panic("failed to get example file")) |example_file| {
         std.debug.assert(example_file.kind == .file);
         // If not a .zig file, skip it
         if (!std.mem.endsWith(u8, example_file.name, ".zig")) continue;
